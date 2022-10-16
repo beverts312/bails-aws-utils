@@ -17,7 +17,5 @@ setup(
     install_requires=["boto3", "python-crontab", "requests"],
     long_description=long_description,
     long_description_content_type="text/markdown",
-    scripts=[
-        "bin/dynamic-dns",
-    ],
+    scripts=["bin/dynamic-dns", "bin/gmail-mx-create"],
 )
