@@ -19,6 +19,5 @@ setup(
     long_description_content_type="text/markdown",
     scripts=[
         "bin/dynamic-dns",
-        "bin/gmail-mx-create",
     ],
 )
