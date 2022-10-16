@@ -1,0 +1,16 @@
+{
+  "files.exclude": {
+    "**/__pycache__/**": true,
+    "**/.pytest_cache/**": true,
+    "**.egg-info/**": true,
+    "venv/**": true,
+  },
+  "python.formatting.provider": "black",
+  "python.linting.pycodestyleEnabled": true,
+  "python.linting.pycodestyleArgs": [
+    "--max-line-length=120"
+  ],
+  "files.associations": {
+    "bin/*": "python",
+  }
+}

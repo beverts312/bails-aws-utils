@@ -1,0 +1,100 @@
+name: Main Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request_target:
+      types: 
+        - opened
+        - synchronize
+        - reopened
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Install dependencies
+        run: pip3 install -r dev-requirements.txt
+      - name: Run Lint
+        run: inv l
+      # - name: Run Unit Tests
+      #   run: inv t
+      # - name: SonarCloud Scan
+      #   uses: sonarsource/sonarcloud-github-action@master
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  analyze:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: python
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
+  security-scans:
+    permissions:
+      contents: read
+      security-events: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # - name: Run Codacy Analysis CLI
+      #   uses: codacy/codacy-analysis-cli-action@d840f886c4bd4edc059706d09c6a1586111c540b
+      #   with:
+      #     project-token: ${{ secrets.CODACY_KEY }}
+      #     verbose: true
+      #     output: results.sarif
+      #     format: sarif
+      #     gh-code-scanning-compat: true
+      #     max-allowed-issues: 2147483647
+
+      - name: Upload Codacy SARIF results file
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: results.sarif
+
+      - name: Run DevSkim scanner
+        uses: microsoft/DevSkim-Action@v1
+        
+      - name: Upload DevSkim scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: devskim-results.sarif
+
+
+  # release:
+  #   needs:
+  #     - validate
+  #     - analyze
+  #     - security-scans
+  #   if: github.ref == 'refs/heads/main'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - name: Install dependencies
+  #       run: pip3 install -r dev-requirements.txt
+  #     - name: Run Release
+  #       run: |
+  #         git config --global user.email "bots@baileyeverts.com"
+  #         git config --global user.name "Semantic Release Bot"
+  #         semantic-release publish -v DEBUG
+  #       env:
+  #         REPOSITORY_PASSWORD: ${{ secrets.REPOSITORY_PASSWORD }}
