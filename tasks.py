@@ -30,11 +30,11 @@ def clean(c):
 
 @task(aliases=["b"])
 def build(c):
-    return c.run("python setup.py bdist_wheel")
+    return c.run("python3 setup.py bdist_wheel")
 
 
 @task(aliases=["bp"])
 def build_and_publish(c):
     clean()
     build()
-    return c.run("python -m twine upload dist/*.whl --verbose")
+    return c.run("python3 -m twine upload dist/*.whl --verbose")
